@@ -1,0 +1,14 @@
+---
+- name: Delete multiple DigitalOcean VPCs
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Delete VPCs
+      community.digitalocean.digital_ocean_vpc:
+        state: absent
+        oauth_token: "{{ lookup('env', 'DO_API_TOKEN') }}"  
+        name: "{{ item }}"
+      loop: "{{ vpc_names }}"
+
+# ansible-playbook delete_vpc.yml -e '{"vpc_names": ["vpc1", "vpc2", "vpc3"]}'
+

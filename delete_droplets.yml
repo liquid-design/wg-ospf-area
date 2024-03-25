@@ -1,0 +1,16 @@
+---
+- hosts: tag_webserver  # Target only hosts under the 'tag_webserver' group
+  gather_facts: false
+  vars_files:
+    - secrets/do_token.yml # file do api  
+  tasks:
+    - name: Delete droplets based on the webserver tag
+      community.digitalocean.digital_ocean_droplet:
+        state: absent
+        oauth_token: "{{ token_do_api }}"
+        id: "{{ do_id }}"
+      delegate_to: localhost
+      loop: "{{ groups['tag_webserver'] | unique }}"
+      loop_control:
+        label: "{{ item }}"
+
