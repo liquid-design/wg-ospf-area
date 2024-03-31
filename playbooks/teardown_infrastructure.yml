@@ -1,0 +1,28 @@
+---
+- name: Teardown DigitalOcean infrastructure
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+    - ../secrets/do_token.yml
+
+  tasks:
+    - name: Fetch droplet information
+      community.digitalocean.digital_ocean_droplet_info:
+        oauth_token: "{{ DO_API_TOKEN }}"
+      register: droplets_info
+
+    - name: Delete webserver droplets
+      community.digitalocean.digital_ocean_droplet:
+        state: absent
+        id: "{{ item.id }}"
+        oauth_token: "{{ DO_API_TOKEN }}"
+      loop: "{{ droplets_info.data | selectattr('tags', 'contains', 'webserver') | list }}"
+      when: droplets_info.data is defined
+
+    # Uncomment the following task to remove the SSH key. Be cautious as this will make the key unusable for future droplets.
+    # - name: Remove SSH key from DigitalOcean
+    #   community.digitalocean.digital_ocean_sshkey:
+    #     state: absent
+    #     fingerprint: "{{ pubkey_info.data.ssh_key.fingerprint }}"
+    #     oauth_token: "{{ DO_API_TOKEN }}"
+    #   when: pubkey_info is defined and pubkey_info.data is defined and pubkey_info.data.ssh_key is defined

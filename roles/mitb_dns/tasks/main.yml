@@ -1,0 +1,15 @@
+---
+- name: Update DNS A records for droplet
+  uri:
+    url: "https://mail.liquid-hosting.be/admin/dns/custom/{{ item.do_name }}"
+    method: PUT
+    body: "{{ item.ansible_host }}"
+    body_format: raw
+    headers:
+      Authorization: "{{ vaulted_secret }}"
+      Content-Type: "text/plain"
+    return_content: yes
+    status_code: [200, 201, 204]  # Adjust based on the expected success codes from your API
+  loop: "{{ webserver_info }}"
+  loop_control:
+    loop_var: item

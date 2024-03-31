@@ -1,0 +1,25 @@
+---
+  - name: Ensure SSH key is added to DigitalOcean
+    community.digitalocean.digital_ocean_sshkey:
+      name: my-sshkey
+      ssh_pub_key: "{{ public_ssh_key }}"
+      state: present
+      oauth_token: "{{ DO_API_TOKEN}}"
+    register: pubkey_info
+
+  - name: Create webserver droplets
+    community.digitalocean.digital_ocean_droplet:
+      name: "{{ item }}"
+      region: ams3
+      image: ubuntu-22-04-x64
+      size: s-1vcpu-1gb
+      state: present
+      oauth_token: "{{ DO_API_TOKEN }}"
+      ssh_keys: ["{{ pubkey_info.data.ssh_key.fingerprint }}"]
+      tags:
+        - webserver
+        - hub
+    loop:
+      - tmp1.overlaet.com
+      - tmp2.overlaet.com
+

@@ -1,0 +1,14 @@
+---
+  - name: Create VPC
+    community.digitalocean.digital_ocean_vpc:
+      state: present
+      oauth_token: "{{ DO_API_TOKEN }}"
+      name: hubbas
+      region: ams3
+      ip_range: 10.10.0.0/24
+    register: my_vpc
+
+  - name: Display the VPC information
+    debug:
+      var: my_vpc
+

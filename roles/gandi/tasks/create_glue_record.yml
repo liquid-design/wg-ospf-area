@@ -1,0 +1,21 @@
+---
+# roles/gandi/tasks/create_glue_record.yml
+- name: Create glue record for server
+  uri:
+    url: "https://api.gandi.net/v5/domain/domains/{{ server.do_name }}/hosts"
+    method: POST
+    body: 
+      name: "{{ server.do_name.split('.')[0] }}"
+      ips: ["{{ server.ansible_host }}"]
+    body_format: json
+    headers:
+      Authorization: "Bearer {{ gandi_api_token }}"
+      Content-Type: "application/json"
+    status_code: [200, 201]
+    return_content: yes
+  register: response
+
+- name: Display creation response
+  debug:
+    var: response.json
+

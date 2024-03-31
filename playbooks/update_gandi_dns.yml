@@ -1,0 +1,25 @@
+---
+- name: Update DNS Records at Gandi for Webserver Instances
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+    - ../secrets/gandi_api.yml  # Assuming you have your Gandi API key here
+
+  tasks:
+    - name: Fetch information for each webserver
+      set_fact:
+        webserver_info: "{{ groups['tag_webserver'] | map('extract', hostvars) | list }}"
+
+    - name: Update DNS records at Gandi
+      loop: "{{ webserver_info }}"
+      loop_control:
+        label: "{{ item.do_name }}"
+      debug:  # Replace this with your actual task for updating DNS at Gandi
+        msg: "Updating DNS for {{ item.do_name }} with IP {{ item.ansible_host }}"
+
+- name: Update DNS records at Gandi
+  hosts: dynamic_webservers
+  gather_facts: no
+  roles:
+    - gandi
+

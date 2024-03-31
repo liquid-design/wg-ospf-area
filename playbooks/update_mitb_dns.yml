@@ -1,0 +1,20 @@
+---
+- name: Update DNS Records at Mail-in-a-Box for Droplets
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+    - ../secrets/secrets.yml  # Ensure this path correctly points to your Mail-in-a-Box API token
+      
+  tasks:
+    - name: Set webserver_info from the dynamic inventory
+      set_fact:
+        webserver_info: "{{ groups['tag_webserver'] | map('extract', hostvars) | list }}"
+        
+    - name: Update DNS records for each webserver
+      include_tasks: ../roles/mitb_dns/tasks/main.yml
+      loop: "{{ webserver_info }}"
+      loop_control:
+        loop_var: server_item
+      vars:
+        mitb_api_token: "{{ mitb_api_token }}"
+

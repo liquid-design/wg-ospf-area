@@ -1,0 +1,32 @@
+---
+# roles/gandi/tasks/main.yml
+- name: Check if glue record exists for each server
+  uri:
+    url: "https://api.gandi.net/v5/domain/domains/{{ item.do_name }}/hosts/{{ item.do_name.split('.')[0] }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ gandi_api_token }}"
+      Content-Type: "application/json"
+    status_code: [200, 404]  # Assuming 200 = exists, 404 = does not exist
+    return_content: yes
+  loop: "{{ webserver_info }}"
+  loop_control:
+    loop_var: server
+  register: glue_record_check
+  ignore_errors: yes  # Important to handle cases where the record does not exist.
+
+- name: Create glue record for server
+  include_tasks: create_glue_record.yml
+  loop: "{{ glue_record_check.results }}"
+  when: item.status == 404  # Conditionally include if the record does not exist
+  loop_control:
+    loop_var: server
+  ignore_errors: true  # Use with caution, primarily for demonstration
+
+- name: Update glue record for server
+  include_tasks: update_glue_record.yml
+  loop: "{{ glue_record_check.results }}"
+  when: item.status == 200  # Conditionally include if the record exists
+  loop_control:
+    loop_var: server
+

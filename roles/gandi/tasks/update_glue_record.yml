@@ -1,0 +1,20 @@
+---
+# roles/gandi/tasks/update_glue_record.yml
+- name: Update glue record for server
+  uri:
+    url: "https://api.gandi.net/v5/domain/domains/{{ server.do_name }}/hosts/{{ server.do_name.split('.')[0] }}"
+    method: PUT
+    body: 
+      ips: ["{{ server.ansible_host }}"]
+    body_format: json
+    headers:
+      Authorization: "Bearer {{ gandi_api_token }}"
+      Content-Type: "application/json"
+    status_code: [200, 201]
+    return_content: yes
+  register: response
+
+- name: Display update response
+  debug:
+    var: response.json
+
